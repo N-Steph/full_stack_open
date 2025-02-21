@@ -1,0 +1,6 @@
+sequenceDiagram
+    participant browser
+    participant server
+    browser->>server: POST: https://studies.cs.helsinki.fi/exampleapp/spa
+    Note Over browser: The browser add the new note to the json string it contains and re-render the notes page
+    Note Over server: The server receives the POST data and add the data to the JSON file in the JSON file in the server
