@@ -1,4 +1,48 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import services from './services/persons'
+
+const ErrorNotification = ({message}) => {
+  const successStyle = {
+      color: 'red',
+      background: 'lightgrey',
+      fontSize: 20,
+      borderStyle: 'solid',
+      borderRadius: 5,
+      padding: 10,
+      marginBottom: 10,
+    }
+  
+  if (message === null) {
+    return null
+  }
+  return (
+    <div style={successStyle}>
+      {`${message}`}
+    </div>
+  )
+}
+
+const SuccessNotification = ({message}) => {
+  const errorStyle = {
+      color: 'green',
+      background: 'lightgrey',
+      fontSize: 20,
+      borderStyle: 'solid',
+      
+      borderRadius: 5,
+      padding: 10,
+      marginBottom: 10
+    }
+  
+  if (message === null) {
+    return null
+  }
+  return (
+    <div style={errorStyle}>
+      {`${message}`}
+    </div>
+  )
+}
 
 const Filter = (props) => {
   return (
@@ -37,34 +81,85 @@ const PersonForm = (props) => {
 const Person = (props) => {
   return (
   <div>
-    {props.match.map(person => <p key={person.id}>{person.name} {person.number}</p>)}
+    {props.match.map(person => {
+      return (
+        <div key={person.id}>
+        {person.name} {person.number}
+        <button onClick={() => props.handleDeletion(person.name, person.id)}>delete</button>
+        </div>
+      )
+    })}
   </div>
   )
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '39-44-5323523', id: 1},
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4}
-  ]) 
+  const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [search, setSearch] = useState('')
   const [match, setMatch] = useState([])
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [successMessage, setSuccessMessage] = useState(null)
+  
+  useEffect(() => {
+    services.getAll().then(response => {
+      setPersons(response.data)
+    })}, [])
 
   const addPerson = (event) => {
     event.preventDefault()
     const personExist = persons.map(person => person.name.toLowerCase()).includes(newName.toLowerCase())
     if (personExist) {
-      alert(`${newName} is already added to phonebook`)
+      confirm(`${newName} is already added to the phonebook, replace old number with a new one?`)
+      const existPerson = persons.filter(person => person.name.toLowerCase() == newName.toLowerCase())
+      const newPersonNumber = {...existPerson[0], number: newNumber}
+      services
+        .update(newPersonNumber)
+        .then(response => {
+          const newPersons = persons.map(person => {
+            if (person.name === response.data.name) {
+              return response.data
+            }
+            return person
+          })
+          const existMatch = match.filter(person => person.name.toLowerCase() == newName.toLowerCase())
+          if (existMatch.length !== 0) {
+            const newMatch = match.map(person => {
+              if (person.name === response.data.name) {
+                return response.data
+              }
+              return person
+            })
+            setMatch(newMatch)
+          }
+          setPersons(newPersons)
+          setSuccessMessage(`${response.data.name} number updated`)
+          setTimeout(() => {
+            setSuccessMessage(null)
+          }, 5000)
+          setNewName('')
+          setNewNumber('')
+        })
+        .catch(error => {
+          setErrorMessage(`Information of ${newName} has already been removed from server`)
+          setTimeout(() => {
+            setErrorMessage(null)
+          }, 5000)
+        })
       return
     }
-    const newObject = { name: newName, number: newNumber, id: persons.length + 1}
-    setPersons(persons.concat(newObject))
-    setNewName('')
-    setNewNumber('')
+    
+    const newObject = { name: newName, number: newNumber}
+    services.postPerson(newObject).then(response => {
+      setPersons(persons.concat(response.data))
+      setSuccessMessage(`Added ${response.data.name}`)
+        setTimeout(() => {
+          setSuccessMessage(null)
+        }, 5000)
+      setNewName('')
+      setNewNumber('')
+    })
   }
 
   const handleNewName = (event) => setNewName(event.target.value)
@@ -81,11 +176,35 @@ const App = () => {
     setMatch(newMatch)
     setSearch(searchValue)
   }
+
+  const handleDeletion = (name, id) => {
+    confirm(`Delete ${name} ?`)
+    services
+      .deletePerson(id)
+      .then(response => {
+        const updatePersons = match.filter(person => person.id !== id)
+        const updatePersonsGlobal = persons.filter(person => person.id !== id)
+        setPersons(updatePersonsGlobal)
+        setSuccessMessage(`Deleted ${response.data.name}`)
+        setTimeout(() => {
+          setSuccessMessage(null)
+        }, 5000)
+        setMatch(updatePersons)
+      })
+      .catch(error => {
+        setErrorMessage(`${response.data.name} already deleted`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
+  }
   
   return (
     <div>
       <h2>Phonebook</h2>
-      <Filter search={search} handleSearch={handleSearch} />
+      <SuccessNotification message={successMessage}/>
+      <ErrorNotification message={errorMessage}/>
+      <Filter search={search} handleSearch={handleSearch}/>
       <h2>add a new</h2>
       <PersonForm 
           onSubmit={addPerson}
@@ -94,7 +213,7 @@ const App = () => {
           newNumber={newNumber}
           handleNewNumber={handleNewNumber}/>
       <h2>Numbers</h2>
-      <Person match={match}/>
+      <Person match={match} handleDeletion={handleDeletion}/>
     </div>
   )
 }
