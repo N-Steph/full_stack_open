@@ -28,6 +28,7 @@ persons = [
 morgan.token('data', function getPostData(req) {
     return JSON.stringify(req.body)
 })
+app.use(express.static('dist'))
 app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
@@ -72,5 +73,5 @@ app.post('/api/persons', (request, response) => {
     response.status(204).end()
 })
 
-const PORT = 3001
+const PORT = 3002
 app.listen(PORT)
