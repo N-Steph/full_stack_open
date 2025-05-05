@@ -152,8 +152,10 @@ const App = () => {
     
     const newObject = { name: newName, number: newNumber}
     services.postPerson(newObject).then(response => {
-      setPersons(persons.concat(response.data))
-      setSuccessMessage(`Added ${response.data.name}`)
+      services.getAll().then(response => {
+        setPersons(response.data)
+        setSuccessMessage(`Added ${newObject.name}`)
+      })
         setTimeout(() => {
           setSuccessMessage(null)
         }, 5000)
@@ -178,21 +180,23 @@ const App = () => {
   }
 
   const handleDeletion = (name, id) => {
-    confirm(`Delete ${name} ?`)
+    if (!confirm(`Delete ${name} ?`)) {
+      return
+    }
     services
       .deletePerson(id)
       .then(response => {
         const updatePersons = match.filter(person => person.id !== id)
         const updatePersonsGlobal = persons.filter(person => person.id !== id)
         setPersons(updatePersonsGlobal)
-        setSuccessMessage(`Deleted ${response.data.name}`)
+        setSuccessMessage(`Deleted ${name}`)
         setTimeout(() => {
           setSuccessMessage(null)
         }, 5000)
         setMatch(updatePersons)
       })
       .catch(error => {
-        setErrorMessage(`${response.data.name} already deleted`)
+        setErrorMessage(`${name} already deleted`)
         setTimeout(() => {
           setErrorMessage(null)
         }, 5000)
