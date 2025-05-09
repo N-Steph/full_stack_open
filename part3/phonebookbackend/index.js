@@ -1,6 +1,8 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const Person = require('./models/person')
 const app = express()
 
 persons = [
@@ -19,11 +21,11 @@ persons = [
         "name": "Dan Abramov",
         "number": "12-43-234345"
     },
-    {
-        "id": "4",
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
-    }
+    // {
+    //     "id": "4",
+    //     "name": "Mary Poppendieck",
+    //     "number": "39-23-6423122"
+    // }
 ]
 
 morgan.token('data', function getPostData(req) {
@@ -35,7 +37,9 @@ app.use(express.json())
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :data'))
 
 app.get('/api/persons', (request, response) => {
-    response.json(persons)
+    Person.find({}).then(persons => {
+        response.json(persons)
+    })
 })
 
 app.get('/info', (request, response) => {
@@ -66,16 +70,24 @@ app.post('/api/persons', (request, response) => {
     if (!newPerson.name || newPerson.name.length === 0 || !newPerson.number || newPerson.number.length === 0) {
         return response.status(400).json({ error: 'name and number must be stated' })
     }
-    const result = persons.map(person => person.name.toLowerCase()).filter(name => name === newPerson.name.toLowerCase())
-    if (result.length !== 0) {
-        return response.status(400).json({ error: 'name must be unique' })
-    }
-    const id = Math.floor((Math.random() * 2000))
-    persons = persons.concat({ id: String(id), ...newPerson })
-    response.status(204).end()
+    // const result = persons.map(person => person.name.toLowerCase()).filter(name => name === newPerson.name.toLowerCase())
+    // if (result.length !== 0) {
+    //     return response.status(400).json({ error: 'name must be unique' })
+    // }
+    // const id = Math.floor((Math.random() * 2000))
+    // persons = persons.concat({ id: String(id), ...newPerson })
+    const name = newPerson.name
+    const number = newPerson.number
+    const person = new Person({
+        name: name,
+        number: number
+    })
+    person.save().then(result => {
+        response.json(result)
+    })
 })
 
-const PORT = 3002
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
