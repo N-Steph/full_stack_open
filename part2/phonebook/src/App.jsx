@@ -153,7 +153,7 @@ const App = () => {
     const newObject = { name: newName, number: newNumber }
     services
       .postPerson(newObject)
-      .then(response => {
+      .then(() => {
         services.getAll().then(response => {
           setPersons(response.data)
           setSuccessMessage(`Added ${newObject.name}`)
@@ -164,7 +164,7 @@ const App = () => {
         setNewName('')
         setNewNumber('')
       })
-      .catch(error => {
+      .catch(() => {
         setErrorMessage("Please enter a name of at least 3 characters")
         setTimeout(() => {
           setErrorMessage(null)
@@ -193,7 +193,7 @@ const App = () => {
     }
     services
       .deletePerson(id)
-      .then(response => {
+      .then(() => {
         const updatePersons = match.filter(person => person.id !== id)
         const updatePersonsGlobal = persons.filter(person => person.id !== id)
         setPersons(updatePersonsGlobal)
@@ -204,7 +204,7 @@ const App = () => {
         }, 5000)
 
       })
-      .catch(error => {
+      .catch(() => {
         setErrorMessage(`${name} already deleted`)
         setTimeout(() => {
           setErrorMessage(null)
