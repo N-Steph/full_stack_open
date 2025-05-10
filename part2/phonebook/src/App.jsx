@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react'
 import services from './services/persons'
 
-const ErrorNotification = ({message}) => {
+const ErrorNotification = ({ message }) => {
   const successStyle = {
-      color: 'red',
-      background: 'lightgrey',
-      fontSize: 20,
-      borderStyle: 'solid',
-      borderRadius: 5,
-      padding: 10,
-      marginBottom: 10,
-    }
-  
+    color: 'red',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  }
+
   if (message === null) {
     return null
   }
@@ -22,18 +22,18 @@ const ErrorNotification = ({message}) => {
   )
 }
 
-const SuccessNotification = ({message}) => {
+const SuccessNotification = ({ message }) => {
   const errorStyle = {
-      color: 'green',
-      background: 'lightgrey',
-      fontSize: 20,
-      borderStyle: 'solid',
-      
-      borderRadius: 5,
-      padding: 10,
-      marginBottom: 10
-    }
-  
+    color: 'green',
+    background: 'lightgrey',
+    fontSize: 20,
+    borderStyle: 'solid',
+
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10
+  }
+
   if (message === null) {
     return null
   }
@@ -48,9 +48,9 @@ const Filter = (props) => {
   return (
     <div>
       filter shown with: <input
-            value={props.search}
-            onChange={props.handleSearch}
-          />
+        value={props.search}
+        onChange={props.handleSearch}
+      />
     </div>
   )
 }
@@ -60,15 +60,15 @@ const PersonForm = (props) => {
     <div>
       <form onSubmit={props.onSubmit}>
         <div>
-          name: <input 
-              value={props.newName}
-              onChange={props.handleNewName}
-              />
+          name: <input
+            value={props.newName}
+            onChange={props.handleNewName}
+          />
         </div>
         <div>
-          number: <input 
-                value={props.newNumber}
-                onChange={props.handleNewNumber}/>
+          number: <input
+            value={props.newNumber}
+            onChange={props.handleNewNumber} />
         </div>
         <div>
           <button type="submit">add</button>
@@ -80,32 +80,33 @@ const PersonForm = (props) => {
 
 const Person = (props) => {
   return (
-  <div>
-    {props.match.map(person => {
-      return (
-        <div key={person.id}>
-        {person.name} {person.number}
-        <button onClick={() => props.handleDeletion(person.name, person.id)}>delete</button>
-        </div>
-      )
-    })}
-  </div>
+    <div>
+      {props.match.map(person => {
+        return (
+          <div key={person.id}>
+            {person.name} {person.number}
+            <button onClick={() => props.handleDeletion(person.name, person.id)}>delete</button>
+          </div>
+        )
+      })}
+    </div>
   )
 }
 
 const App = () => {
-  const [persons, setPersons] = useState([]) 
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [search, setSearch] = useState('')
   const [match, setMatch] = useState([])
   const [errorMessage, setErrorMessage] = useState(null)
   const [successMessage, setSuccessMessage] = useState(null)
-  
+
   useEffect(() => {
     services.getAll().then(response => {
       setPersons(response.data)
-    })}, [])
+    })
+  }, [])
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -113,9 +114,8 @@ const App = () => {
     if (personExist) {
       confirm(`${newName} is already added to the phonebook, replace old number with a new one?`)
       const existPerson = persons.filter(person => person.name.toLowerCase() == newName.toLowerCase())
-      const newPersonNumber = {...existPerson[0], number: newNumber}
       services
-        .update(newPersonNumber)
+        .update({ ...existPerson[0], number: newNumber })
         .then(response => {
           const newPersons = persons.map(person => {
             if (person.name === response.data.name) {
@@ -142,26 +142,34 @@ const App = () => {
           setNewNumber('')
         })
         .catch(error => {
-          setErrorMessage(`Information of ${newName} has already been removed from server`)
+          setErrorMessage(error.response.data.error)
           setTimeout(() => {
             setErrorMessage(null)
           }, 5000)
         })
       return
     }
-    
-    const newObject = { name: newName, number: newNumber}
-    services.postPerson(newObject).then(response => {
-      services.getAll().then(response => {
-        setPersons(response.data)
-        setSuccessMessage(`Added ${newObject.name}`)
-      })
+
+    const newObject = { name: newName, number: newNumber }
+    services
+      .postPerson(newObject)
+      .then(response => {
+        services.getAll().then(response => {
+          setPersons(response.data)
+          setSuccessMessage(`Added ${newObject.name}`)
+        })
         setTimeout(() => {
           setSuccessMessage(null)
         }, 5000)
-      setNewName('')
-      setNewNumber('')
-    })
+        setNewName('')
+        setNewNumber('')
+      })
+      .catch(error => {
+        setErrorMessage("Please enter a name of at least 3 characters")
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
   }
 
   const handleNewName = (event) => setNewName(event.target.value)
@@ -190,10 +198,11 @@ const App = () => {
         const updatePersonsGlobal = persons.filter(person => person.id !== id)
         setPersons(updatePersonsGlobal)
         setSuccessMessage(`Deleted ${name}`)
+        setMatch(updatePersons)
         setTimeout(() => {
           setSuccessMessage(null)
         }, 5000)
-        setMatch(updatePersons)
+
       })
       .catch(error => {
         setErrorMessage(`${name} already deleted`)
@@ -202,22 +211,22 @@ const App = () => {
         }, 5000)
       })
   }
-  
+
   return (
     <div>
       <h2>Phonebook</h2>
-      <SuccessNotification message={successMessage}/>
-      <ErrorNotification message={errorMessage}/>
-      <Filter search={search} handleSearch={handleSearch}/>
+      <SuccessNotification message={successMessage} />
+      <ErrorNotification message={errorMessage} />
+      <Filter search={search} handleSearch={handleSearch} />
       <h2>add a new</h2>
-      <PersonForm 
-          onSubmit={addPerson}
-          newName={newName}
-          handleNewName={handleNewName}
-          newNumber={newNumber}
-          handleNewNumber={handleNewNumber}/>
+      <PersonForm
+        onSubmit={addPerson}
+        newName={newName}
+        handleNewName={handleNewName}
+        newNumber={newNumber}
+        handleNewNumber={handleNewNumber} />
       <h2>Numbers</h2>
-      <Person match={match} handleDeletion={handleDeletion}/>
+      <Person match={match} handleDeletion={handleDeletion} />
     </div>
   )
 }
