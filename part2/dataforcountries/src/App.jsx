@@ -82,12 +82,9 @@ const App = () => {
         }
       })
       setMatches(newMatches)
-      // if (matches.length > 1) {
-      //   // setWeatherCond(null)
-      //   console.log('executed');
-      //   console.log(weatherCond);
-      //   console.log(matches)  
-      // }   
+      if (matches.length > 1) {
+        setWeatherCond(null)  
+      }   
     }
     else {
       setMatches([])
@@ -105,7 +102,6 @@ const App = () => {
     if (!weatherCond) {
       handleWeatherCondition(countryDetail[0].capital[0])
     }
-    // handleWeatherCondition(countryDetail[0].capital[0])
     return countryDetail[0]
   }
 
@@ -117,7 +113,6 @@ const App = () => {
       axios.get(`https://api.weatherapi.com/v1/current.json?key=${import.meta.env.VITE_WEATHER_KEY}&q=${capital}&aqi=yes`)
       .then(response => {
         setWeatherCond(response.data)
-        console.log('calling')
       })
       .catch(error => console.log(error))
   }
