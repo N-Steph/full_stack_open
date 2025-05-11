@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
-import axios from 'axios'
+// import axios from 'axios'
+import countryServices from './services/data'
 import WeatherReport from './components/WeatherReport'
 import Message from './components/Message'
 import CountryDetail from './components/CountryDetail'
@@ -12,16 +13,13 @@ const App = () => {
   const [weatherCond, setWeatherCond] = useState(null)
 
   useEffect(() => {
-    axios.get('https://studies.cs.helsinki.fi/restcountries/api/All')
-      .then(response => {
-        const result = response.data
-        setCountriesDetail(result)
-        setCountries(result.map(unit => unit.name.common))
+    countryServices
+      .getCountries()
+      .then(data => {
+        setCountriesDetail(data)
+        setCountries(data.map(unit => unit.name.common))
       })
-      .catch(error => {
-        console.log(error)
-      })
-
+      .catch(error => console.log(error))
   }, [])
 
   const findMatches = (searchTerm) => {
@@ -33,8 +31,8 @@ const App = () => {
       })
       setMatches(newMatches)
       if (matches.length > 1) {
-        setWeatherCond(null)  
-      }   
+        setWeatherCond(null)
+      }
     }
     else {
       setMatches([])
@@ -60,11 +58,10 @@ const App = () => {
     setWeatherCond(null)
   }
 
-  const handleWeatherCondition =  (capital) => {
-      axios.get(`https://api.weatherapi.com/v1/current.json?key=${import.meta.env.VITE_WEATHER_KEY}&q=${capital}&aqi=yes`)
-      .then(response => {
-        setWeatherCond(response.data)
-      })
+  const handleWeatherCondition = (capital) => {
+    countryServices
+      .getWeatherDetails(capital)
+      .then(data => setWeatherCond(data))
       .catch(error => console.log(error))
   }
 
@@ -75,7 +72,7 @@ const App = () => {
       </form>
       <Message matches={matches} onClick={handleButtonClick} />
       <CountryDetail details={matches.length === 1 ? () => getCountryDetail(matches[0]) : null} />
-      <WeatherReport ready={matches.length === 1? weatherCond: null} />
+      <WeatherReport ready={matches.length === 1 ? weatherCond : null} />
     </div>
   )
 }
