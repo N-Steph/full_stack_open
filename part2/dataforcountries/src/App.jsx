@@ -1,58 +1,8 @@
 import { useState, useEffect } from "react"
 import axios from 'axios'
-
-const WeatherReport = (props) => {
-  if (props.ready) {
-    return (
-      <div>
-        <h2>Weather {props.ready.location.name}</h2>
-        <p>Temperature {props.ready.current.temp_c} Celsius</p>
-        <img src={props.ready.current.condition.icon} />
-        <p>Wind {props.ready.current.wind_mph} m/s</p>
-      </div>
-    )
-  }
-}
-
-const CountryDetail = (props) => {
-  if (!props.details) {
-    return
-  }
-  const details = props.details()
-  return (
-    <div>
-      <h1>{details.name.common}</h1>
-      <p>Capital {details.capital}</p>
-      <p>Area {details.area}</p>
-      <h2>Languages</h2>
-      <ul>
-        {Object.entries(details.languages).map(([key, value]) => <li key={key}>{value}</li>)}
-      </ul>
-      <img src={details.flags.png} />
-    </div>
-  )
-}
-
-const Message = (props) => {
-  const listStyle = {
-    listStyleType: 'none',
-    margin: '0',
-    padding: '0',
-  }
-  if (props.matches.length > 10) {
-    return <p>Too many matches, specify another filter</p>
-  }
-  else if (props.matches.length > 1 && props.matches.length <= 10) {
-    return (
-      <ul style={listStyle}>
-        {props.matches.map((match, index) => <li key={index}>
-          {match}
-          <button onClick={() => props.onClick(match)}>show</button>
-        </li>)}
-      </ul>
-    )
-  }
-}
+import WeatherReport from './components/WeatherReport'
+import Message from './components/Message'
+import CountryDetail from './components/CountryDetail'
 
 const App = () => {
   const [search, setSearch] = useState('')
@@ -107,6 +57,7 @@ const App = () => {
 
   const handleButtonClick = (countryName) => {
     setMatches([countryName])
+    setWeatherCond(null)
   }
 
   const handleWeatherCondition =  (capital) => {
