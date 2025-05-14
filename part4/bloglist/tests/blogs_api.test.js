@@ -61,9 +61,10 @@ test("post new data correctly", async () => {
       .expect(201)
       .expect('Content-Type', /application\/json/)
     
-    const blogsNewState = await Blog.find({})
-    const titles = blogsNewState.map(blog => blog.title)
-    assert.equal(blogsNewState.length, blogs.length + 1)
+    const blogsNewState = await api.get('/api/blogs')
+    const titles = blogsNewState.body.map(blog => blog.title)
+    console.log(titles)
+    assert.equal(blogsNewState.body.length, blogs.length + 1)
     assert(titles.includes("First class tests"))
 })
 
@@ -88,6 +89,15 @@ test("handle bad request", async () => {
     .post('/api/blogs')
     .send(newBlog)
     .expect(400)
+})
+
+test("verify id property is unique identifier", async () => {
+  const res = await api.get('/api/blogs')
+
+  res.body.forEach(blog => {
+    assert.notEqual(blog.id, undefined)
+    assert.equal(res._id, undefined)
+  })
 })
 
 after(async () => {
