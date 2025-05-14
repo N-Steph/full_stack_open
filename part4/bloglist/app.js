@@ -3,6 +3,7 @@ const express = require('express')
 const blogRouter = require('./controllers/blogs')
 const mongoose = require('mongoose')
 const morgan = require('morgan')
+const cors = require('cors')
 
 const app = express()
 

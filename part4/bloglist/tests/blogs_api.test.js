@@ -44,9 +44,9 @@ test("blogs are return as json", async () => {
 test('all blogs are returned', async () => {
   const response = await api.get('/api/blogs')
 
-
   assert.strictEqual(response.body.length, blogs.length)
 })
+
 
 test("post new data correctly", async () => {
     const newBlog = {
@@ -62,7 +62,22 @@ test("post new data correctly", async () => {
       .expect('Content-Type', /application\/json/)
     
     const blogsNewState = await Blog.find({})
+    const titles = blogsNewState.map(blog => blog.title)
     assert.equal(blogsNewState.length, blogs.length + 1)
+    assert(titles.includes("First class tests"))
+})
+
+test("default likes to 0 if missing", async () => {
+  const newBlog = {
+    title: "First class tests",
+    author: "Robert C. Martin",
+    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+  }
+  const response = await api.post('/api/blogs').send(newBlog)
+  const savedBlog = response.body
+  console.log(savedBlog)
+  
+  assert.equal(savedBlog.likes, 0)
 })
 
 after(async () => {
