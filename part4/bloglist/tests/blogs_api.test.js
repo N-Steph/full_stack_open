@@ -80,6 +80,16 @@ test("default likes to 0 if missing", async () => {
   assert.equal(savedBlog.likes, 0)
 })
 
+test("handle bad request", async () => {
+  const newBlog = {
+    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+  }
+  await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(400)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
