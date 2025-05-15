@@ -110,6 +110,41 @@ test("delete a blog post resource", async () => {
   assert.equal(promise.body.length, blogs.length - 1)
 })
 
+// test("delete a non existing resource", async () => {
+//   await api
+//     .delete(`/api/blogs/46465489764564`)
+//     .expect(404)
+// })
+describe("test put request" , () => {
+  test("with valid id 201 is return",  async () => {
+    const res = await api.get('/api/blogs')
+    await api
+      .put(`/api/blogs/${res.body[0].id}`)
+      .send({ ...res.body[0], likes: 10})
+      .expect(201)
+      .expect('Content-Type', /application\/json/)
+    
+    const blog = await Blog.findById(res.body[0].id)
+    assert.equal(blog.likes, 10)
+  })
+  
+  test("with non existing id 404 is return", async () => {
+    const res = await api.get('/api/blogs')
+    await api
+      .put(`/api/blogs/6824785608fd7ba6ab3a8f2a`)
+      .send({...res.body[0], likes: 10})
+      .expect(404)
+  })
+  
+  test.only("with an invalide id 400 is return", async () => {
+    const res = await api.get('/api/blogs')
+    await api
+      .put(`/api/blogs/6824785608fd7ba6ab3a8f2af`)
+      .send({...res.body[0], likes: 10})
+      .expect(400)
+  })
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
