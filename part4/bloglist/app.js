@@ -26,9 +26,25 @@ morgan.token('data', function getPostData(req) {
 
 app.use(cors())
 app.use(express.json())
-app.use(morgan('dev', {
+app.use(morgan(function (tokens, req, res) {
+  const status = tokens.status(req, res);
+  const statusColor = status >= 500 ? 31 
+    : status >= 400 ? 33 
+    : status >= 300 ? 36 
+    : status >= 200 ? 32 
+    : 0; 
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    '\x1b[' + statusColor + 'm' + status + '\x1b[0m',
+    tokens['response-time'](req, res), 'ms', '-',
+    tokens.res(req, res, 'content-length'),
+    tokens['data'](req, res)
+    ].join(' ');
+  }, {
     skip: () => process.env.NODE_ENV === 'test'
-}))
+  })
+)
 app.use('/api', blogRouter)
 app.use(middleware.unknownEndpoint)
 
