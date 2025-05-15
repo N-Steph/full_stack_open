@@ -34,8 +34,14 @@ blogRouter.post('/blogs', async (request, response) => {
 
 blogRouter.delete('/blogs/:id', async (request, response) => {
   const id = request.params.id
+  if (!/^[0-9a-fA-F]{24}$/.test(id)) {
+    return response.status(400).end()
+  }
   try {
-    const promise = await Blog.findByIdAndDelete(id)
+    const blog = await Blog.findByIdAndDelete(id)
+    if (!blog) {
+      return response.status(404).end()
+    }
     response.status(204).end()
   }
   catch(error) {
