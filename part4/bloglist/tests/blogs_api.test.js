@@ -1,5 +1,5 @@
 const app = require('../app')
-const { test, beforeEach, after } = require('node:test')
+const { test, beforeEach, after, describe } = require('node:test')
 const assert = require('node:assert')
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
@@ -100,21 +100,30 @@ test("verify id property is unique identifier", async () => {
   })
 })
 
-test("delete a blog post resource", async () => {
-  const res = await api.get('/api/blogs')
-  await api
-    .delete(`/api/blogs/${res.body[0].id}`)
-    .expect(204)
+describe("test delete request", () => {
+  test("with a valid id blog post resource", async () => {
+    const res = await api.get('/api/blogs')
+    await api
+      .delete(`/api/blogs/${res.body[0].id}`)
+      .expect(204)
+    
+    const promise = await api.get('/api/blogs')
+    assert.equal(promise.body.length, blogs.length - 1)
+  })
   
-  const promise = await api.get('/api/blogs')
-  assert.equal(promise.body.length, blogs.length - 1)
+  test.only("with a valid but non existing id 404 is return", async () => {
+    await api
+      .delete(`/api/blogs/6824785608fd7ba6ab3a8f2a`)
+      .expect(404)
+  })
+  
+  test("with an invalid id 400 is return", async () => {
+    await api
+      .delete(`/api/blogs/46465489764564`)
+      .expect(400)
+  })
 })
 
-// test("delete a non existing resource", async () => {
-//   await api
-//     .delete(`/api/blogs/46465489764564`)
-//     .expect(404)
-// })
 describe("test put request" , () => {
   test("with valid id 201 is return",  async () => {
     const res = await api.get('/api/blogs')
@@ -136,7 +145,7 @@ describe("test put request" , () => {
       .expect(404)
   })
   
-  test.only("with an invalide id 400 is return", async () => {
+  test("with an invalide id 400 is return", async () => {
     const res = await api.get('/api/blogs')
     await api
       .put(`/api/blogs/6824785608fd7ba6ab3a8f2af`)
