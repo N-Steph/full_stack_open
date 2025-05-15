@@ -45,6 +45,9 @@ blogRouter.delete('/blogs/:id', async (request, response) => {
 
 blogRouter.put('/blogs/:id', async (request, response) => {
   const { likes } = request.body
+  if (!/^[0-9a-fA-F]{24}$/.test(request.params.id)) {
+    return response.status(400).end()
+  }
   const blog = await Blog.findById(request.params.id)
   console.log(blog)
   if (!blog) {
