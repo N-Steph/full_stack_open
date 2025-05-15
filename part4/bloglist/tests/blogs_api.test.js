@@ -100,6 +100,16 @@ test("verify id property is unique identifier", async () => {
   })
 })
 
+test("delete a blog post resource", async () => {
+  const res = await api.get('/api/blogs')
+  await api
+    .delete(`/api/blogs/${res.body[0].id}`)
+    .expect(204)
+  
+  const promise = await api.get('/api/blogs')
+  assert.equal(promise.body.length, blogs.length - 1)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
