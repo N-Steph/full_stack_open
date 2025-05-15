@@ -12,7 +12,7 @@ blogRouter.get('/blogs', async (request, response) => {
   
 })
 
-blogRouter.post('/blogs', async (request, response , next) => {
+blogRouter.post('/blogs',  (request, response , next) => {
   const body = request.body
   const blog = new Blog({
     title: body.title,
@@ -26,11 +26,11 @@ blogRouter.post('/blogs', async (request, response , next) => {
   }
 
   try {
-    const result = await blog.save()
+    const result =  blog.save()
     response.status(201).json(result)
   }
-  catch(error) {
-    next(error)
+  catch (exception) {
+    console.log(exception)
   }
   
 })

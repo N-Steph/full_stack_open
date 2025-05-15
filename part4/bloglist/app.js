@@ -47,6 +47,6 @@ app.use(morgan(function (tokens, req, res) {
 )
 app.use('/api', blogRouter)
 app.use(middleware.unknownEndpoint)
-app.use(middleware.errorHandler)
+// app.use(middleware.errorHandler)
 
 module.exports = app
