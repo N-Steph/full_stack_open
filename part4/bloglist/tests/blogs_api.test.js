@@ -7,7 +7,9 @@ const supertest = require('supertest')
 
 const api = supertest(app)
 
-const blogs = [
+describe("test api route", () => {
+  
+  const blogs = [
     {
       title: "React patterns",
       author: "Michael Chan",
@@ -27,133 +29,144 @@ const blogs = [
       likes: 12,
     }
 ]
-
-beforeEach(async () => {
+  beforeEach(async () => {
     await Blog.deleteMany({})
 
     await Blog.insertMany(blogs)
-})
+  })
 
-test("blogs are return as json", async () => {
-    await api
-      .get('/api/blogs')
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-})
+  describe("test post request", () => {
 
-test('all blogs are returned', async () => {
-  const response = await api.get('/api/blogs')
+    test("blogs are return as json", async () => {
+      await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+    })
 
-  assert.strictEqual(response.body.length, blogs.length)
-})
+    test('all blogs are returned', async () => {
+      const response = await api.get('/api/blogs')
 
+      assert.strictEqual(response.body.length, blogs.length)
+    })
+  })
 
-test("post new data correctly", async () => {
-    const newBlog = {
+  describe("test post request", () => {
+
+    test("with valid blog 201 is return", async () => {
+      const newBlog = {
+          title: "First class tests",
+          author: "Robert C. Martin",
+          url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+          likes: 10
+        }
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+      
+      const blogsNewState = await api.get('/api/blogs')
+      const titles = blogsNewState.body.map(blog => blog.title)
+      console.log(titles)
+      assert.equal(blogsNewState.body.length, blogs.length + 1)
+      assert(titles.includes("First class tests"))
+    })
+
+    test("with missing title or author, 400 is return", async () => {
+      const newBlog = {
+        url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
+      }
+      await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(400)
+    })
+
+    test("missing likes property is default to 0", async () => {
+      const newBlog = {
         title: "First class tests",
         author: "Robert C. Martin",
         url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-        likes: 10
       }
-    await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
+      const response = await api.post('/api/blogs').send(newBlog)
+      const savedBlog = response.body
+      console.log(savedBlog)
+      
+      assert.equal(savedBlog.likes, 0)
+    })
+  })
+
+  describe("id property is the unique identifier", () => {
+
+    test("id property is present and _id property is not present", async () => {
+      const res = await api.get('/api/blogs')
     
-    const blogsNewState = await api.get('/api/blogs')
-    const titles = blogsNewState.body.map(blog => blog.title)
-    console.log(titles)
-    assert.equal(blogsNewState.body.length, blogs.length + 1)
-    assert(titles.includes("First class tests"))
-})
-
-test("default likes to 0 if missing", async () => {
-  const newBlog = {
-    title: "First class tests",
-    author: "Robert C. Martin",
-    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-  }
-  const response = await api.post('/api/blogs').send(newBlog)
-  const savedBlog = response.body
-  console.log(savedBlog)
-  
-  assert.equal(savedBlog.likes, 0)
-})
-
-test("handle bad request", async () => {
-  const newBlog = {
-    url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
-  }
-  await api
-    .post('/api/blogs')
-    .send(newBlog)
-    .expect(400)
-})
-
-test("verify id property is unique identifier", async () => {
-  const res = await api.get('/api/blogs')
-
-  res.body.forEach(blog => {
-    assert.notEqual(blog.id, undefined)
-    assert.equal(res._id, undefined)
+      res.body.forEach(blog => {
+        assert.notEqual(blog.id, undefined)
+        assert.equal(res._id, undefined)
+      })
+    })
   })
-})
 
-describe("test delete request", () => {
-  test("with a valid id blog post resource", async () => {
-    const res = await api.get('/api/blogs')
-    await api
-      .delete(`/api/blogs/${res.body[0].id}`)
-      .expect(204)
+
+  describe("test delete request", () => {
+
+    test("with a valid id blog post resource", async () => {
+      const res = await api.get('/api/blogs')
+      await api
+        .delete(`/api/blogs/${res.body[0].id}`)
+        .expect(204)
+      
+      const promise = await api.get('/api/blogs')
+      assert.equal(promise.body.length, blogs.length - 1)
+    })
     
-    const promise = await api.get('/api/blogs')
-    assert.equal(promise.body.length, blogs.length - 1)
-  })
-  
-  test.only("with a valid but non existing id 404 is return", async () => {
-    await api
-      .delete(`/api/blogs/6824785608fd7ba6ab3a8f2a`)
-      .expect(404)
-  })
-  
-  test("with an invalid id 400 is return", async () => {
-    await api
-      .delete(`/api/blogs/46465489764564`)
-      .expect(400)
-  })
-})
-
-describe("test put request" , () => {
-  test("with valid id 201 is return",  async () => {
-    const res = await api.get('/api/blogs')
-    await api
-      .put(`/api/blogs/${res.body[0].id}`)
-      .send({ ...res.body[0], likes: 10})
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
+    test("with a valid but non existing id 404 is return", async () => {
+      await api
+        .delete(`/api/blogs/6824785608fd7ba6ab3a8f2a`)
+        .expect(404)
+    })
     
-    const blog = await Blog.findById(res.body[0].id)
-    assert.equal(blog.likes, 10)
+    test("with an invalid id 400 is return", async () => {
+      await api
+        .delete(`/api/blogs/46465489764564`)
+        .expect(400)
+    })
   })
-  
-  test("with non existing id 404 is return", async () => {
-    const res = await api.get('/api/blogs')
-    await api
-      .put(`/api/blogs/6824785608fd7ba6ab3a8f2a`)
-      .send({...res.body[0], likes: 10})
-      .expect(404)
-  })
-  
-  test("with an invalide id 400 is return", async () => {
-    const res = await api.get('/api/blogs')
-    await api
-      .put(`/api/blogs/6824785608fd7ba6ab3a8f2af`)
-      .send({...res.body[0], likes: 10})
-      .expect(400)
-  })
-})
 
-after(async () => {
-    await mongoose.connection.close()
+  describe("test put request" , () => {
+
+    test("with valid id 201 is return",  async () => {
+      const res = await api.get('/api/blogs')
+      await api
+        .put(`/api/blogs/${res.body[0].id}`)
+        .send({ ...res.body[0], likes: 10})
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+      
+      const blog = await Blog.findById(res.body[0].id)
+      assert.equal(blog.likes, 10)
+    })
+    
+    test("with non existing id 404 is return", async () => {
+      const res = await api.get('/api/blogs')
+      await api
+        .put(`/api/blogs/6824785608fd7ba6ab3a8f2a`)
+        .send({...res.body[0], likes: 10})
+        .expect(404)
+    })
+    
+    test("with an invalide id 400 is return", async () => {
+      const res = await api.get('/api/blogs')
+      await api
+        .put(`/api/blogs/6824785608fd7ba6ab3a8f2af`)
+        .send({...res.body[0], likes: 10})
+        .expect(400)
+    })
+  })
+
+    after(async () => {
+        await mongoose.connection.close()
+    })
 })
