@@ -8,7 +8,7 @@ const supertest = require('supertest')
 const api = supertest(app)
 
 describe("test api route", () => {
-  
+
   const blogs = [
     {
       title: "React patterns",
@@ -68,12 +68,11 @@ describe("test api route", () => {
       
       const blogsNewState = await api.get('/api/blogs')
       const titles = blogsNewState.body.map(blog => blog.title)
-      console.log(titles)
       assert.equal(blogsNewState.body.length, blogs.length + 1)
       assert(titles.includes("First class tests"))
     })
 
-    test("with missing title or author, 400 is return", async () => {
+    test.only("with missing title or author, 400 is return", async () => {
       const newBlog = {
         url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
       }
@@ -83,7 +82,7 @@ describe("test api route", () => {
         .expect(400)
     })
 
-    test("missing likes property is default to 0", async () => {
+    test.only("missing likes property is default to 0", async () => {
       const newBlog = {
         title: "First class tests",
         author: "Robert C. Martin",
@@ -91,8 +90,6 @@ describe("test api route", () => {
       }
       const response = await api.post('/api/blogs').send(newBlog)
       const savedBlog = response.body
-      console.log(savedBlog)
-      
       assert.equal(savedBlog.likes, 0)
     })
   })

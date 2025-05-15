@@ -12,11 +12,14 @@ blogRouter.get('/blogs', async (request, response) => {
   
 })
 
-blogRouter.post('/blogs', async (request, response) => {
-  const blog = new Blog(request.body)
-  if (!blog.likes) {
-    blog.likes = 0
-  }
+blogRouter.post('/blogs', async (request, response , next) => {
+  const body = request.body
+  const blog = new Blog({
+    title: body.title,
+    author: body.author,
+    url: body.url,
+    likes: body.likes || 0,
+  })
   if (!blog.title || !blog.url) {
     response.status(400).end()
     return
@@ -27,7 +30,7 @@ blogRouter.post('/blogs', async (request, response) => {
     response.status(201).json(result)
   }
   catch(error) {
-    console.log(error)
+    next(error)
   }
   
 })
