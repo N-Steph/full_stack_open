@@ -35,7 +35,7 @@ describe("test api route", () => {
     await Blog.insertMany(blogs)
   })
 
-  describe("test post request", () => {
+  describe("test get request", () => {
 
     test("blogs are return as json", async () => {
       await api

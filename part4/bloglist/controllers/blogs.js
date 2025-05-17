@@ -12,13 +12,13 @@ blogRouter.get('/blogs', async (request, response) => {
   
 })
 
-blogRouter.post('/blogs',  (request, response , next) => {
+blogRouter.post('/blogs', async (request, response , next) => {
   const body = request.body
   const blog = new Blog({
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes || 0,
+    likes: body.likes || 0
   })
   if (!blog.title || !blog.url) {
     response.status(400).end()
@@ -26,7 +26,7 @@ blogRouter.post('/blogs',  (request, response , next) => {
   }
 
   try {
-    const result =  blog.save()
+    const result =  await blog.save()
     response.status(201).json(result)
   }
   catch (exception) {
