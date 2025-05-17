@@ -72,7 +72,7 @@ describe("test api route", () => {
       assert(titles.includes("First class tests"))
     })
 
-    test.only("with missing title or author, 400 is return", async () => {
+    test("with missing title or author, 400 is return", async () => {
       const newBlog = {
         url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
       }
@@ -82,7 +82,7 @@ describe("test api route", () => {
         .expect(400)
     })
 
-    test.only("missing likes property is default to 0", async () => {
+    test("missing likes property is default to 0", async () => {
       const newBlog = {
         title: "First class tests",
         author: "Robert C. Martin",
