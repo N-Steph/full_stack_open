@@ -17,3 +17,4 @@ userRouter.post('/api/users', async () => {
     response.status(201).json(savedUser)
 })
 
+module.exports = userRouter
