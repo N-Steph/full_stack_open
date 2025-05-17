@@ -1,6 +1,7 @@
 const config = require('./utils/config')
 const express = require('express')
 const blogRouter = require('./controllers/blogs')
+const userRouter = require('./controllers/users')
 const mongoose = require('mongoose')
 const morgan = require('morgan')
 const cors = require('cors')
@@ -46,6 +47,7 @@ app.use(morgan(function (tokens, req, res) {
   })
 )
 app.use('/api', blogRouter)
+app.use('/api', userRouter)
 app.use(middleware.unknownEndpoint)
 // app.use(middleware.errorHandler)
 
