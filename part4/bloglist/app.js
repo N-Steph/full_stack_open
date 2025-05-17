@@ -46,8 +46,8 @@ app.use(morgan(function (tokens, req, res) {
     skip: () => process.env.NODE_ENV === 'test'
   })
 )
-app.use('/api', blogRouter)
-app.use('/api', userRouter)
+app.use('/api/blogs', blogRouter)
+app.use('/api/users', userRouter)
 app.use(middleware.unknownEndpoint)
 // app.use(middleware.errorHandler)
 

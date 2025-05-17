@@ -1,7 +1,7 @@
 const Blog = require('../models/blog')
 const blogRouter = require('express').Router() 
 
-blogRouter.get('/blogs', async (request, response) => {
+blogRouter.get('/', async (request, response) => {
   try {
     const blogs = await Blog.find({})
     response.json(blogs)
@@ -12,7 +12,7 @@ blogRouter.get('/blogs', async (request, response) => {
   
 })
 
-blogRouter.post('/blogs', async (request, response , next) => {
+blogRouter.post('/', async (request, response , next) => {
   const body = request.body
   const blog = new Blog({
     title: body.title,
@@ -35,7 +35,7 @@ blogRouter.post('/blogs', async (request, response , next) => {
   
 })
 
-blogRouter.delete('/blogs/:id', async (request, response) => {
+blogRouter.delete('/:id', async (request, response) => {
   const id = request.params.id
   if (!/^[0-9a-fA-F]{24}$/.test(id)) {
     return response.status(400).end()
@@ -52,7 +52,7 @@ blogRouter.delete('/blogs/:id', async (request, response) => {
   }
 })
 
-blogRouter.put('/blogs/:id', async (request, response) => {
+blogRouter.put('/:id', async (request, response) => {
   const { likes } = request.body
   if (!/^[0-9a-fA-F]{24}$/.test(request.params.id)) {
     return response.status(400).end()
