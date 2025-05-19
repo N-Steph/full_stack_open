@@ -1,10 +1,11 @@
 const Blog = require('../models/blog')
+const User = require('../models/user')
 const blogRouter = require('express').Router() 
 
 blogRouter.get('/', async (request, response, next) => {
   try {
-    const blogs = await Blog.find({})
-    response.json(blogs)
+    const blogs = await Blog.find({}).populate('user')
+    response.status(200).json(blogs)
   }
   catch(error) {
     next(error)
@@ -14,10 +15,13 @@ blogRouter.get('/', async (request, response, next) => {
 
 blogRouter.post('/', async (request, response , next) => {
   const body = request.body
+  const users = await User.find({})
+  const user = users[Math.floor(Math.random() * users.length)]
   const blog = new Blog({
     title: body.title,
     author: body.author,
     url: body.url,
+    user: user.id,
     likes: body.likes || 0
   })
   if (!blog.title || !blog.url) {
@@ -26,8 +30,10 @@ blogRouter.post('/', async (request, response , next) => {
   }
 
   try {
-    const result =  await blog.save()
-    response.status(201).json(result)
+    const savedBlog =  await blog.save()
+    user.blogs = user.blogs.concat(savedBlog._id)
+    await user.save()
+    response.status(201).json(savedBlog)
   }
   catch (error) {
     next(error)
