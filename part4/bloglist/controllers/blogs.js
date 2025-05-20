@@ -59,7 +59,7 @@ blogRouter.delete('/:id', middleware.userExtractor, async (request, response, ne
     if (!blog) {
       return response.status(404).end()
     }
-    if (!(blog.user.toString() === decodedToken.id.toString())) {
+    if (!(blog.user.toString() === user.id)) {
       return response.status(401).json({
         error: "user can't delete a blog he/she didn't write"
       })
