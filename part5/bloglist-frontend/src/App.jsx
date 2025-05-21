@@ -4,7 +4,7 @@ import blogService from './services/blogs'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(JSON.parse(window.localStorage.getItem('user')))
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
 
@@ -28,11 +28,18 @@ const App = () => {
 
     event.preventDefault()
     const validation = await blogService.postCredentials({ username, password })
-    
+    setUsername("")
+    setPassword("")
     if (!validation) {
       return
     }
-    setUser(validation)
+    window.localStorage.setItem('user', JSON.stringify(validation))
+    setUser(JSON.parse(window.localStorage.getItem('user')))
+  }
+
+  const logoutHandler = () => {
+    window.localStorage.clear()
+    setUser(null)
   }
 
   if (user === null) {
@@ -52,7 +59,7 @@ const App = () => {
           <input 
             type="password" 
             id="Upassword" 
-            value={upassword} 
+            value={password} 
             onChange={handlePasswordChange}
           /><br/>
 
@@ -65,6 +72,7 @@ const App = () => {
   return (
     <div>
       <h2>blogs</h2>
+      <p>{ user.username } logged in</p> <button onClick={logoutHandler}>logout</button>
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
       )}
