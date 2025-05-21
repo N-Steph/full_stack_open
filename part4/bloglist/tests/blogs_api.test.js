@@ -1,5 +1,5 @@
 const app = require('../app')
-const { test, beforeEach, after, describe } = require('node:test')
+const { test, beforeEach, after, describe, before } = require('node:test')
 const assert = require('node:assert')
 const Blog = require('../models/blog')
 const mongoose = require('mongoose')
@@ -36,10 +36,20 @@ describe("test api route", async () => {
       likes: 12,
     }
   ]
-  beforeEach(async () => {
+
+  let savedUser = null
+  let credentials = null
+
+  before( async () => {
     await User.deleteMany()
     const user = new User(userDetail)
-    const savedUser = await user.save()
+    savedUser = await user.save()
+    credentials = await api.post('/api/login')
+      .send({ username: "nsteph", password: "ztw658/*-2"})
+      .expect(200)
+  })
+
+  beforeEach(async () => {
     await Blog.deleteMany()
     blogs.forEach(blog => {
       blog.user = savedUser.id
@@ -67,9 +77,6 @@ describe("test api route", async () => {
   describe("test post request", () => {
 
     test("with valid blog 201 is return", async () => {
-      const userAuthenticate = await api.post('/api/login')
-      .send({ username: "nsteph", password: "ztw658/*-2"})
-      .expect(200)
       const newBlog = {
           title: "First class tests",
           author: "Robert C. Martin",
@@ -78,7 +85,7 @@ describe("test api route", async () => {
         }
       await api
         .post('/api/blogs')
-        .set('Authorization', `Bearer ${ JSON.parse(userAuthenticate.text).token }`)
+        .set('Authorization', `Bearer ${ JSON.parse(credentials.text).token }`)
         .send(newBlog)
         .expect(201)
         .expect('Content-Type', /application\/json/)
@@ -90,30 +97,24 @@ describe("test api route", async () => {
     })
 
     test("with missing title or author, 400 is return", async () => {
-      const userAuthenticate = await api.post('/api/login')
-      .send({ username: "nsteph", password: "ztw658/*-2"})
-      .expect(200)
       const newBlog = {
         url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
       }
       await api
         .post('/api/blogs')
-        .set('Authorization', `Bearer ${ JSON.parse(userAuthenticate.text).token }`)
+        .set('Authorization', `Bearer ${ JSON.parse(credentials.text).token }`)
         .send(newBlog)
         .expect(400)
     })
 
     test("missing likes property is default to 0", async () => {
-      const userAuthenticate = await api.post('/api/login')
-      .send({ username: "nsteph", password: "ztw658/*-2"})
-      .expect(200)
       const newBlog = {
         title: "First class tests",
         author: "Robert C. Martin",
         url: "http://blog.cleancoder.com/uncle-bob/2017/05/05/TestDefinitions.htmll",
       }
       const response = await api.post('/api/blogs')
-      .set('Authorization', `Bearer ${ JSON.parse(userAuthenticate.text).token }`)
+      .set('Authorization', `Bearer ${ JSON.parse(credentials.text).token }`)
       .send(newBlog)
       const savedBlog = response.body
       assert.equal(savedBlog.likes, 0)
@@ -136,13 +137,10 @@ describe("test api route", async () => {
   describe("test delete request", () => {
 
     test("with a valid id blog post resource", async () => {
-      const userAuthenticate = await api.post('/api/login')
-      .send({ username: "nsteph", password: "ztw658/*-2"})
-      .expect(200)
       const res = await api.get('/api/blogs')
       await api
         .delete(`/api/blogs/${res.body[0].id}`)
-        .set('Authorization', `Bearer ${ JSON.parse(userAuthenticate.text).token }`)
+        .set('Authorization', `Bearer ${ JSON.parse(credentials.text).token }`)
         .expect(204)
       
       const promise = await api.get('/api/blogs')
@@ -150,22 +148,16 @@ describe("test api route", async () => {
     })
     
     test("with a valid but non existing id 404 is return", async () => {
-      const userAuthenticate = await api.post('/api/login')
-      .send({ username: "nsteph", password: "ztw658/*-2"})
-      .expect(200)
       await api
         .delete(`/api/blogs/6824785608fd7ba6ab3a8f2a`)
-        .set('Authorization', `Bearer ${ JSON.parse(userAuthenticate.text).token }`)
+        .set('Authorization', `Bearer ${ JSON.parse(credentials.text).token }`)
         .expect(404)
     })
     
     test("with an invalid id 400 is return", async () => {
-      const userAuthenticate = await api.post('/api/login')
-      .send({ username: "nsteph", password: "ztw658/*-2"})
-      .expect(200)
       await api
         .delete(`/api/blogs/46465489764564`)
-        .set('Authorization', `Bearer ${ JSON.parse(userAuthenticate.text).token }`)
+        .set('Authorization', `Bearer ${ JSON.parse(credentials.text).token }`)
         .expect(400)
     })
   })
