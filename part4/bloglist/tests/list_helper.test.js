@@ -140,13 +140,11 @@ describe("Most blogs", () => {
 
   test("when list contains on blog return that author and 1 as value of blog", () => {
     const result = listHelper.mostBlogs([blogs[0]])
-    console.log(result)
     assert.deepStrictEqual(result, { author: blogs[0].author, blogs: 1 })
   })
 
   test("when list contains an author with highest number of blogs", () => {
     const result = listHelper.mostBlogs(blogs)
-    console.log(result)
     assert.deepStrictEqual(result, { author: blogs[4].author, blogs: 3 })
   })
 })
