@@ -13,7 +13,10 @@ const Blog = ({ blog }) => {
   const incrementLikes = async (id) => {
     setLikes(likes + 1)
     const data = await blogService.updateLikes(id, {...blogDetails, likes: likes + 1})
-    console.log(data.status)
+    if (data.status != 201) {
+      alert('could not update like in backend')
+      setLikes(likes - 1)
+    }
   }
 
   const blogStyle = {

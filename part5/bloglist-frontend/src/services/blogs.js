@@ -32,7 +32,7 @@ const postBlogDetails = async (blogDetails, token) => {
 const updateLikes = async (id, blogDetails) => {
   try {
     const response = await axios.put(`${baseUrl}/${id}`, blogDetails)
-    return {data: 0, status: response.status}
+    return {data: response.data, status: response.status}
   }
   catch (error) {
     return {data: null, status: error.status} 
