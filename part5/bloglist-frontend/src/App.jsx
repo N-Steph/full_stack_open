@@ -91,6 +91,15 @@ const App = () => {
     }
   }
 
+  const deleteBlog = async (id, token, blogtext) => {
+    if (window.confirm(`Remove ${blogtext}`)) {
+      const index = blogs.indexOf(id)
+      blogs.splice(index, 1)
+      setBlogs([...blogs])
+      await blogService.deleteBlog(id, token) 
+    }
+  }
+
   if (user === null) {
     return (
       <div>
@@ -110,7 +119,7 @@ const App = () => {
         <NewBlogForm newBlogHandler={newBlogHandler}/>
       </Togglable>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} deleteBlog={deleteBlog} user={user}/>
       )}
     </div>
   )
