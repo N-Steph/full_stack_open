@@ -1,4 +1,4 @@
-const LoginForm = ({newBlogHandler}) => {
+const NewNoteForm = ({newBlogHandler}) => {
     return (
       <form onSubmit={newBlogHandler}>
         <label htmlFor='title'>title:</label>
@@ -24,4 +24,4 @@ const LoginForm = ({newBlogHandler}) => {
     )
 }
 
-export default LoginForm
+export default NewNoteForm
