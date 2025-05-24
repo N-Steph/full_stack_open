@@ -1,4 +1,4 @@
-const loginForm = ({ loginHandler }) => {
+const LoginForm = ({ loginHandler }) => {
     return (
         <form onSubmit={loginHandler}>
           <label htmlFor="Usrname">username</label>
@@ -19,3 +19,5 @@ const loginForm = ({ loginHandler }) => {
         </form>
     )
 }
+
+export default LoginForm
