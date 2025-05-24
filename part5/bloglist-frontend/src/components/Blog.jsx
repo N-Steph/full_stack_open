@@ -1,10 +1,19 @@
 import { useState } from 'react'
+import blogService from '../services/blogs'
 
 const Blog = ({ blog }) => {
   const [visible, setVisible] = useState(false)
+  const [likes, setLikes] = useState(blog.likes)
+  const [blogDetails, setBlogDetails] = useState(blog)
 
   const toggleVisibility = () => {
     setVisible(!visible)
+  }
+
+  const incrementLikes = async (id) => {
+    setLikes(likes + 1)
+    const data = await blogService.updateLikes(id, {...blogDetails, likes: likes + 1})
+    console.log(data.status)
   }
 
   const blogStyle = {
@@ -19,13 +28,12 @@ const Blog = ({ blog }) => {
   return (
 
     <div style={blogStyle}>
-      <div style={{display: visible ? 'none' : ''}}>
-        {blog.title} {blog.author} <button onClick={toggleVisibility}>view</button>
+      <div>
+        {blog.title} {blog.author} <button onClick={toggleVisibility}>{visible ? 'hide' : 'view'}</button>
       </div>
       <div style={{display: visible ? '' : 'none'}}>
-        {blog.title} {blog.author}
         <p>{blog.url}</p>
-        <p>likes {blog.likes} <button onClick={toggleVisibility}>hide</button></p>
+        <p>likes {likes} <button onClick={() => {incrementLikes(blog.id)}}>like</button></p>
         <p>{blog.user.username}</p>
       </div>
   </div>

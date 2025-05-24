@@ -29,4 +29,14 @@ const postBlogDetails = async (blogDetails, token) => {
   }
 }
 
-export default { getAll, postCredentials, postBlogDetails }
+const updateLikes = async (id, blogDetails) => {
+  try {
+    const response = await axios.put(`${baseUrl}/${id}`, blogDetails)
+    return {data: 0, status: response.status}
+  }
+  catch (error) {
+    return {data: null, status: error.status} 
+  }
+}
+
+export default { getAll, postCredentials, postBlogDetails, updateLikes }
