@@ -16,9 +16,9 @@ const App = () => {
   const newBlogRef = useRef()
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+    blogService.getAll().then(blogs => {
+      setBlogs(blogs)
+    })
   }, [])
 
   const loginHandler = async (event) => {
